@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split Expense</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #F6F4EF;
+            --surface: #FFFFFF;
+            --border: #E6E1D9;
+            --ink: #18160F;
+            --ink-muted: #68635C;
+            --ink-faint: #B3ADA5;
+            --accent: #2A6349;
+            --accent-light: #E6F2EC;
+            --accent-hover: #1F4F39;
+            --danger: #B83B2A;
+            --danger-light: #FCECEA;
+            --amber: #C97A06;
+            --amber-light: #FEF3C7;
+            --shadow-sm: 0 1px 4px rgba(24, 22, 15, 0.07);
+            --shadow-md: 0 4px 18px rgba(24, 22, 15, 0.09);
+            --radius: 14px;
+            --radius-sm: 9px;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            letter-spacing: -0.01em;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1.5px solid var(--border);
+            padding: 0 28px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            gap: 16px;
+        }
+
+        .logo {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .header-session {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            max-width: 480px;
+        }
+
+        .header-input {
+            border: 1.5px solid transparent;
+            border-radius: 7px;
+            background: transparent;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            color: var(--ink-muted);
+            padding: 4px 8px;
+            height: 32px;
+            transition: all 0.15s;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .header-input:hover {
+            border-color: var(--border);
+            background: var(--bg);
+        }
+
+        .header-input:focus {
+            border-color: var(--accent);
+            background: white;
+            color: var(--ink);
+            cursor: text;
+        }
+
+        .header-input.sn {
+            font-weight: 500;
+            width: 180px;
+        }
+
+        .header-input.sd {
+            width: 130px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+        }
+
+        .header-sep {
+            color: var(--ink-faint);
+            font-size: 0.7rem;
+        }
+
+        .tab-nav {
+            background: var(--surface);
+            border-bottom: 1.5px solid var(--border);
+            display: flex;
+            padding: 0 28px;
+            position: sticky;
+            top: 56px;
+            z-index: 100;
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 20px;
+            height: 46px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: var(--ink-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 2.5px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--ink);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-pill {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.63rem;
+            padding: 2px 7px;
+            color: var(--ink-muted);
+            min-width: 20px;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .tab-btn.active .tab-pill {
+            background: var(--accent-light);
+            color: var(--accent);
+            border-color: rgba(42, 99, 73, 0.2);
+        }
+
+        main {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 28px 24px 80px;
+        }
+
+        .tab-page {
+            display: none;
+            animation: fadeUp 0.2s ease;
+        }
+
+        .tab-page.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flex-between {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .flex-end {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .section-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.63rem;
+            font-weight: 500;
+            color: var(--ink-faint);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.02rem;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .card-title .icon {
+            width: 26px;
+            height: 26px;
+            background: var(--accent-light);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 20px 22px;
+            margin-bottom: 16px;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        label {
+            display: block;
+            font-size: 0.77rem;
+            font-weight: 500;
+            color: var(--ink-muted);
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            height: 40px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 11px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.87rem;
+            color: var(--ink);
+            background: var(--bg);
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(42, 99, 73, 0.09);
+            background: white;
+        }
+
+        input::placeholder {
+            color: var(--ink-faint);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            padding: 10px 20px;
+            box-shadow: 0 1px 3px rgba(42, 99, 73, 0.28);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(42, 99, 73, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--ink-muted);
+            border: 1.5px solid var(--border);
+            padding: 9px 18px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--ink-muted);
+            color: var(--ink);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--accent);
+            padding: 7px 12px;
+            font-size: 0.8rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .btn-ghost:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-ghost-muted {
+            background: transparent;
+            color: var(--ink-muted);
+            padding: 10px 12px;
+            font-size: 0.8rem;
+            border-radius: var(--radius-sm);
+            border: 1.5px dashed var(--border);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-ghost-muted:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .btn-danger-ghost {
+            background: transparent;
+            color: var(--danger);
+            padding: 5px 9px;
+            font-size: 0.76rem;
+            border-radius: 6px;
+        }
+
+        .btn-danger-ghost:hover {
+            background: var(--danger-light);
+        }
+
+        .btn-lg {
+            height: 46px;
+            padding: 0 26px;
+            font-size: 0.91rem;
+            border-radius: var(--radius);
+        }
+
+        /* PEOPLE — plain, no toggles */
+        .people-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .person-chip {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 7px 10px;
+            transition: border-color 0.15s;
+        }
+
+        .person-chip:focus-within {
+            border-color: var(--accent);
+            background: white;
+        }
+
+        .p-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.63rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .person-chip input {
+            border: none;
+            background: transparent;
+            padding: 0;
+            height: auto;
+            font-size: 0.84rem;
+            flex: 1;
+            min-width: 0;
+            box-shadow: none !important;
+        }
+
+        .remove-person {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--ink-faint);
+            font-size: 0.92rem;
+            line-height: 1;
+            padding: 0 2px;
+            transition: color 0.15s;
+            flex-shrink: 0;
+        }
+
+        .remove-person:hover {
+            color: var(--danger);
+        }
+
+        /* ITEM CARD */
+        .item-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            transition: box-shadow 0.2s;
+        }
+
+        .item-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .item-top {
+            display: grid;
+            grid-template-columns: 1fr 140px auto;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 12px;
+        }
+
+        .split-type-tabs {
+            display: flex;
+            gap: 3px;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 3px;
+        }
+
+        .split-tab {
+            flex: 1;
+            padding: 5px 6px;
+            border: none;
+            background: transparent;
+            border-radius: 5px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.69rem;
+            font-weight: 500;
+            color: var(--ink-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .split-tab.active {
+            background: var(--surface);
+            color: var(--accent);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .item-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .toggle {
+            position: relative;
+            width: 34px;
+            height: 19px;
+            display: inline-block;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+            background: var(--border);
+            border-radius: 20px;
+            transition: background 0.2s;
+        }
+
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            width: 13px;
+            height: 13px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        .toggle input:checked+.toggle-slider {
+            background: var(--accent);
+        }
+
+        .toggle input:checked+.toggle-slider:before {
+            transform: translateX(15px);
+        }
+
+        .toggle-text {
+            font-size: 0.73rem;
+            color: var(--ink-muted);
+        }
+
+        /* SPLIT TABLE — stable DOM, no re-render on input */
+        .splits-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .splits-table th {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.07em;
+            color: var(--ink-faint);
+            text-transform: uppercase;
+            font-weight: 500;
+            padding: 4px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .splits-table th.r {
+            text-align: right;
+        }
+
+        .splits-table td {
+            padding: 5px 8px;
+            vertical-align: middle;
+        }
+
+        .splits-table tr.excl-row td {
+            opacity: 0.35;
+        }
+
+        .splits-table tr.excl-row .split-name-cell {
+            text-decoration: line-through;
+            color: var(--ink-faint);
+        }
+
+        .splits-table tr+tr td {
+            border-top: 1px solid var(--border);
+        }
+
+        /* per-row In/Out pill */
+        .inout-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px 2px 5px;
+            border-radius: 20px;
+            border: 1.5px solid;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            white-space: nowrap;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .inout-pill.in {
+            border-color: rgba(42, 99, 73, 0.35);
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .inout-pill.out {
+            border-color: rgba(184, 59, 42, 0.3);
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .inout-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .inout-pill.in .inout-dot {
+            background: var(--accent);
+        }
+
+        .inout-pill.out .inout-dot {
+            background: var(--danger);
+        }
+
+        .s-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .split-name-cell {
+            font-size: 0.83rem;
+            font-weight: 500;
+        }
+
+        /* stable inputs inside table — no re-render */
+        .splits-table input[type="number"] {
+            width: 88px;
+            height: 32px;
+            text-align: right;
+            padding: 0 8px;
+            font-size: 0.82rem;
+            background: white;
+        }
+
+        .split-share-cell {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.76rem;
+            color: var(--ink-muted);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .split-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 10px;
+            background: var(--accent-light);
+            border-radius: 8px;
+            margin-top: 8px;
+            border: 1px solid rgba(42, 99, 73, 0.18);
+        }
+
+        .split-total-label {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .split-total-val {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.79rem;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .split-warning {
+            font-size: 0.71rem;
+            color: var(--danger);
+            margin-top: 6px;
+            display: none;
+        }
+
+        /* PAYMENTS */
+        .payment-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--accent-light);
+            border: 1.5px solid rgba(42, 99, 73, 0.25);
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+        }
+
+        .payment-info-bar span {
+            font-size: 0.82rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .payments-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+
+        .payment-row {
+            display: grid;
+            grid-template-columns: 28px 1fr 150px;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        /* SUMMARY */
+        .summary-hero {
+            background: var(--ink);
+            color: white;
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            margin-bottom: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 80% 50%, rgba(42, 99, 73, 0.55) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .summary-hero-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.75rem;
+            letter-spacing: -0.03em;
+            margin-bottom: 3px;
+            position: relative;
+        }
+
+        .summary-hero-meta {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.5);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 8px;
+            position: relative;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            flex: 1;
+            min-width: 100px;
+            padding: 11px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+        }
+
+        .hero-stat-val {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.35rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-stat-label {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.42);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .settle-card {
+            background: var(--surface);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 20px rgba(42, 99, 73, 0.1);
+        }
+
+        .settle-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.2rem;
+            color: var(--ink);
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settle-subtitle {
+            font-size: 0.76rem;
+            color: var(--ink-muted);
+            margin-bottom: 16px;
+        }
+
+        .settlement-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 14px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            margin-bottom: 7px;
+        }
+
+        .s-name {
+            font-size: 0.86rem;
+            font-weight: 500;
+        }
+
+        .s-verb {
+            font-size: 0.76rem;
+            color: var(--ink-muted);
+        }
+
+        .s-arrow {
+            color: var(--ink-faint);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .s-amount {
+            margin-left: auto;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.97rem;
+            font-weight: 500;
+            color: white;
+            background: var(--accent);
+            padding: 5px 14px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        .settled-all {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px;
+            background: var(--accent-light);
+            border-radius: var(--radius-sm);
+            border: 1.5px solid rgba(42, 99, 73, 0.2);
+            color: var(--accent);
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .balances-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 9px;
+            margin-bottom: 18px;
+        }
+
+        .balance-card {
+            border-radius: var(--radius-sm);
+            padding: 13px 15px;
+            border: 1.5px solid;
+        }
+
+        .balance-card.positive {
+            background: var(--accent-light);
+            border-color: rgba(42, 99, 73, 0.22);
+        }
+
+        .balance-card.negative {
+            background: var(--danger-light);
+            border-color: rgba(184, 59, 42, 0.18);
+        }
+
+        .balance-card.zero {
+            background: var(--bg);
+            border-color: var(--border);
+        }
+
+        .balance-person {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 7px;
+        }
+
+        .balance-amount {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem;
+            letter-spacing: -0.02em;
+        }
+
+        .balance-amount.positive {
+            color: var(--accent);
+        }
+
+        .balance-amount.negative {
+            color: var(--danger);
+        }
+
+        .balance-amount.zero {
+            color: var(--ink-muted);
+        }
+
+        .balance-label {
+            font-size: 0.7rem;
+            color: var(--ink-muted);
+            margin-top: 2px;
+            line-height: 1.6;
+        }
+
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.79rem;
+        }
+
+        .breakdown-table th {
+            text-align: left;
+            padding: 7px 10px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.09em;
+            color: var(--ink-faint);
+            text-transform: uppercase;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .breakdown-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .breakdown-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .breakdown-table tr:hover td {
+            background: var(--bg);
+        }
+
+        td.mono {
+            font-family: 'DM Mono', monospace;
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 2px 0;
+            user-select: none;
+        }
+
+        .collapsible-header:hover .collapsible-title {
+            color: var(--accent);
+        }
+
+        .collapsible-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 0.98rem;
+            color: var(--ink);
+            transition: color 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .collapsible-arrow {
+            color: var(--ink-faint);
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+        }
+
+        .collapsible-arrow.open {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-body {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.2s;
+        }
+
+        .collapsible-body.closed {
+            max-height: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .collapsible-body.open {
+            max-height: 3000px;
+            opacity: 1;
+            padding-top: 14px;
+        }
+
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 18px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .whatsapp-btn:hover {
+            background: #1ebe5a;
+            transform: translateY(-1px);
+        }
+
+        .whatsapp-btn svg {
+            width: 15px;
+            height: 15px;
+            fill: white;
+            flex-shrink: 0;
+        }
+
+        .copy-toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 9999;
+            white-space: nowrap;
+        }
+
+        .copy-toast.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 680px) {
+            .item-top {
+                grid-template-columns: 1fr auto;
+            }
+
+            .item-top>*:nth-child(2) {
+                grid-column: 1/-1;
+            }
+
+            header {
+                padding: 0 14px;
+                gap: 8px;
+            }
+
+            .header-input.sn {
+                width: 130px;
+            }
+
+            .header-input.sd {
+                width: 95px;
+            }
+
+            .tab-nav,
+            main {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .splits-table input[type="number"] {
+                width: 70px;
+            }
+        }
+
+        @media print {
+
+            header,
+            .tab-nav,
+            #tab-input,
+            #payments-section,
+            #summary-actions {
+                display: none !important;
+            }
+
+            #tab-output {
+                display: block !important;
+            }
+
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">Split<span>Expense</span></div>
+        <div class="header-session">
+            <input type="text" class="header-input sn" id="session-title" placeholder="Session name…">
+            <span class="header-sep">·</span>
+            <input type="text" class="header-input sd" id="session-date" placeholder="Date">
+        </div>
+    </header>
+
+    <div class="tab-nav">
+        <button class="tab-btn active" id="nav-input" onclick="switchTab('input')">
+            👥 People & Items <span class="tab-pill" id="pill-items">0</span>
+        </button>
+        <button class="tab-btn" id="nav-output" onclick="switchTab('output')">
+            💳 Payments & Summary
+        </button>
+    </div>
+
+    <main>
+
+        <!-- TAB 1 -->
+        <div class="tab-page active" id="tab-input">
+
+            <div class="card">
+                <div class="card-title"><span class="icon">👥</span> People</div>
+                <div class="people-grid" id="people-grid"></div>
+                <button class="btn btn-ghost" onclick="addPerson()">＋ Add person</button>
+            </div>
+
+            <div class="flex-between" style="margin-bottom:10px;">
+                <div class="section-label" style="margin-bottom:0;">Items & Splits</div>
+                <button class="btn btn-ghost" onclick="addItem()">＋ Add item</button>
+            </div>
+
+            <div id="items-list"></div>
+
+            <div style="margin-bottom:20px;">
+                <button class="btn btn-ghost-muted" onclick="addItem()">＋ Add another item</button>
+            </div>
+
+            <div class="flex-end">
+                <button class="btn btn-primary btn-lg" onclick="goToPayments()">Continue to Payments →</button>
+            </div>
+        </div>
+
+        <!-- TAB 2 -->
+        <div class="tab-page" id="tab-output">
+
+            <div id="payments-section">
+                <div class="card">
+                    <div class="card-title"><span class="icon">💸</span> Who paid how much?</div>
+                    <p style="font-size:0.79rem;color:var(--ink-muted);margin-bottom:13px;">Enter the total amount each
+                        person paid across the whole session.</p>
+                    <div class="payments-grid" id="payments-grid"></div>
+                    <div class="split-total-row" style="margin-top:10px;">
+                        <span class="split-total-label">Total entered</span>
+                        <span class="split-total-val" id="total-paid-display">₹0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="auto-pay-bar" class="payment-info-bar" style="display:none;">
+                <span>✓ Payments pulled automatically from per-item tracking. Nothing to enter here.</span>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-bottom:22px;">
+                <button class="btn btn-primary btn-lg" onclick="buildSummary()">⚡ Calculate & Settle</button>
+            </div>
+
+            <div id="summary-content"></div>
+            <div id="summary-actions" style="display:none;" class="flex-end">
+                <button class="btn btn-secondary" onclick="switchTab('input')">← Edit</button>
+                <button class="btn btn-secondary" onclick="startNew()">↺ New Session</button>
+                <button class="btn btn-primary" onclick="window.print()">🖨 Print / PDF</button>
+            </div>
+        </div>
+
+    </main>
+    <div class="copy-toast" id="copy-toast">Copied! Paste in WhatsApp.</div>
+
+    <script>
+        // ── STATE ─────────────────────────────────────────────────────────────────────
+        let people = [], items = [];
+        let pIdCtr = 0, iIdCtr = 0;
+        let payments = {};
+
+        const COLORS = ['#2A6349', '#1B4F72', '#7D3C0F', '#6C3483', '#1A5276', '#145A32', '#922B21', '#117A65', '#1F618D', '#7D6608', '#6E2F28', '#154360'];
+        const gc = i => COLORS[i % COLORS.length];
+        const ini = n => (!n || !n.trim()) ? '?' : n.trim().split(/\s+/).map(w => w[0].toUpperCase()).slice(0, 2).join('');
+        const fmt = v => `₹${(+v || 0).toFixed(2)}`;
+
+        // ── INIT ──────────────────────────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('session-date').value =
+                new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            addPerson('Person 1'); addPerson('Person 2'); addPerson('Person 3');
+            addItem();
+        });
+
+        // ── TABS ──────────────────────────────────────────────────────────────────────
+        function switchTab(t) {
+            document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + t).classList.add('active');
+            document.getElementById('nav-' + t).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToPayments() {
+            if (people.length < 2) { alert('Add at least 2 people first.'); return; }
+            if (!items.length) { alert('Add at least one item.'); return; }
+            renderPayments();
+            switchTab('output');
+        }
+
+        // ── PEOPLE ────────────────────────────────────────────────────────────────────
+        function addPerson(name = '') {
+            const id = ++pIdCtr;
+            people.push({ id, name });
+            // Add slot in all existing items, default included
+            items.forEach(item => {
+                if (!item.splits[id]) item.splits[id] = { qty: 0, pct: 0, custom: 0, paid: 0, included: true };
+                // Re-build this item's split table immediately so the new person appears
+                rebuildSplitTable(item.id);
+            });
+            renderPeople();
+            if (name === '') {
+                setTimeout(() => {
+                    const inputs = document.querySelectorAll('.person-chip input');
+                    if (inputs.length > 0) inputs[inputs.length - 1].focus();
+                }, 10);
+            }
+        }
+
+        function renderPeople() {
+            const g = document.getElementById('people-grid');
+            g.innerHTML = '';
+            people.forEach((p, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'person-chip';
+                chip.innerHTML = `
+      <div class="p-avatar" style="background:${gc(i)}">${ini(p.name)}</div>
+      <input type="text" value="${p.name}" placeholder="Name"
+        oninput="updatePersonName(${p.id}, this.value)"
+        onfocus="if(this.value.startsWith('Person ')){this.value=''; updatePersonName(${p.id}, '');}"
+        onkeydown="if(event.key==='Enter'){event.preventDefault(); addPerson();}">
+      <button class="remove-person" onclick="removePerson(${p.id})">×</button>`;
+                g.appendChild(chip);
+            });
+        }
+
+        function updatePersonName(id, name) {
+            const p = people.find(x => x.id === id); if (!p) return;
+            p.name = name;
+            // Update avatar and name in people grid without full re-render
+            const chips = document.querySelectorAll('.person-chip');
+            people.forEach((per, i) => {
+                if (per.id === id && chips[i]) chips[i].querySelector('.p-avatar').textContent = ini(name);
+            });
+            // Update name cells in all split tables
+            document.querySelectorAll(`.split-name-cell[data-pid="${id}"]`).forEach(el => {
+                el.textContent = name || 'Person';
+            });
+            // Update name cells in the payments table if it exists
+            const payGrid = document.getElementById('payments-grid');
+            if (payGrid && payGrid.children.length > 0) {
+                people.forEach((per, i) => {
+                    if (per.id === id && payGrid.children[i]) {
+                        payGrid.children[i].querySelector('.s-avatar').textContent = ini(name);
+                        payGrid.children[i].querySelectorAll('div')[1].textContent = name || 'Person';
+                    }
+                });
+            }
+        }
+
+        function removePerson(id) {
+            people = people.filter(p => p.id !== id);
+            items.forEach(item => delete item.splits[id]);
+            renderPeople();
+            // Re-render all item split tables
+            items.forEach(item => rebuildSplitTable(item.id));
+        }
+
+        // ── ITEMS ─────────────────────────────────────────────────────────────────────
+        function addItem() {
+            const id = ++iIdCtr;
+            const splits = {};
+            people.forEach(p => { splits[p.id] = { qty: 0, pct: 0, custom: 0, paid: 0, included: true }; });
+            items.push({ id, name: '', total: 0, splitType: 'equal', showPayer: false, splits });
+            appendItemCard(id);
+            updatePill();
+            setTimeout(() => {
+                const el = document.getElementById(`ic-${id}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    const input = el.querySelector('input[type="text"]');
+                    if (input) input.focus();
+                }
+            }, 60);
+        }
+
+        function updatePill() {
+            document.getElementById('pill-items').textContent = items.length;
+        }
+
+        // Build and append a single item card to the list
+        function appendItemCard(itemId) {
+            const item = items.find(x => x.id === itemId);
+            const list = document.getElementById('items-list');
+
+            // Clear empty state if present
+            if (list.querySelector('.empty-items')) list.innerHTML = '';
+
+            const card = document.createElement('div');
+            card.className = 'item-card'; card.id = `ic-${itemId}`;
+
+            const labels = { equal: 'Equal', qty: 'By Qty', pct: 'By %', custom: 'Custom ₹' };
+            card.innerHTML = `
+    <div class="item-top">
+      <div>
+        <label>Item / description</label>
+        <input type="text" value="${item.name}" placeholder="Beers, Pizza, Cab…"
+          oninput="onItemName(${itemId}, this.value)"
+          onkeydown="if(event.key==='Enter') this.parentElement.nextElementSibling.querySelector('input').focus()">
+      </div>
+      <div>
+        <label>Total (₹)</label>
+        <input type="number" value="${item.total || ''}" placeholder="0.00" min="0" step="0.01"
+          oninput="onItemTotal(${itemId}, this.value)"
+          onfocus="this.select()"
+          onkeydown="if(event.key==='Enter') addItem()">
+      </div>
+      <button class="btn btn-danger-ghost" style="margin-bottom:2px;" onclick="removeItem(${itemId})">✕</button>
+    </div>
+    <div class="item-controls">
+      <div class="split-type-tabs" id="stabs-${itemId}">
+        ${['equal', 'qty', 'pct', 'custom'].map(t =>
+                `<button class="split-tab ${item.splitType === t ? 'active' : ''}"
+            onclick="setSplitType(${itemId},'${t}')">${labels[t]}</button>`
+            ).join('')}
+      </div>
+      <div class="toggle-wrap">
+        <span class="toggle-text">Track who paid</span>
+        <label class="toggle">
+          <input type="checkbox" id="payer-toggle-${itemId}" ${item.showPayer ? 'checked' : ''}
+            onchange="togglePayer(${itemId}, this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div id="stable-${itemId}"></div>
+    <div class="split-warning" id="warn-${itemId}"></div>`;
+
+            list.appendChild(card);
+            rebuildSplitTable(itemId);
+        }
+
+        function renderAllItems() {
+            const list = document.getElementById('items-list');
+            list.innerHTML = '';
+            if (!items.length) {
+                list.innerHTML = `<div class="empty-items" style="text-align:center;padding:36px;color:var(--ink-faint);font-size:0.84rem;">No items yet.</div>`;
+                updatePill(); return;
+            }
+            items.forEach(item => appendItemCard(item.id));
+            updatePill();
+        }
+
+        function onItemName(itemId, val) {
+            const item = items.find(x => x.id === itemId); if (item) item.name = val;
+        }
+
+        function onItemTotal(itemId, val) {
+            const item = items.find(x => x.id === itemId); if (!item) return;
+            item.total = parseFloat(val) || 0;
+            refreshShareCells(itemId);
+        }
+
+        function setSplitType(itemId, type) {
+            const item = items.find(x => x.id === itemId); if (!item) return;
+            item.splitType = type;
+            people.forEach(p => {
+                if (item.splits[p.id]) { item.splits[p.id].qty = 0; item.splits[p.id].pct = 0; item.splits[p.id].custom = 0; }
+            });
+            // Update tab highlights
+            const tabs = document.querySelectorAll(`#stabs-${itemId} .split-tab`);
+            const order = ['equal', 'qty', 'pct', 'custom'];
+            tabs.forEach((t, i) => t.classList.toggle('active', order[i] === type));
+            // Rebuild split table
+            rebuildSplitTable(itemId);
+        }
+
+        function togglePayer(itemId, checked) {
+            const item = items.find(x => x.id === itemId); if (!item) return;
+            item.showPayer = checked;
+            rebuildSplitTable(itemId);
+        }
+
+        function removeItem(id) {
+            items = items.filter(x => x.id !== id);
+            const card = document.getElementById(`ic-${id}`);
+            if (card) card.remove();
+            if (!items.length) {
+                document.getElementById('items-list').innerHTML =
+                    `<div class="empty-items" style="text-align:center;padding:36px;color:var(--ink-faint);font-size:0.84rem;">No items yet.</div>`;
+            }
+            updatePill();
+        }
+
+        // ── SPLIT TABLE (stable DOM — no destroy/recreate on value change) ────────────
+        function rebuildSplitTable(itemId) {
+            const item = items.find(x => x.id === itemId); if (!item) return;
+            const container = document.getElementById(`stable-${itemId}`); if (!container) return;
+
+            const showPayer = item.showPayer;
+            const typeLabels = { equal: 'Auto-split', qty: 'Qty', pct: '%', custom: 'Amount (₹)' };
+
+            let html = `<table class="splits-table">
+    <thead><tr>
+      <th style="width:60px">Include</th>
+      <th style="width:30px"></th>
+      <th>Person</th>
+      <th class="r" style="width:110px">${typeLabels[item.splitType]}</th>
+      <th class="r" style="width:90px">Share</th>
+      ${showPayer ? `<th class="r" style="width:110px">Paid (₹)</th>` : ''}
+    </tr></thead>
+    <tbody>`;
+
+            people.forEach((p, i) => {
+                const sp = item.splits[p.id] || { qty: 0, pct: 0, custom: 0, paid: 0, included: true };
+                const incl = sp.included !== false; // default true
+                const excl = !incl;
+
+                const included_people = people.filter(pp => (item.splits[pp.id]?.included !== false));
+                const tQty = included_people.reduce((s, pp) => s + (item.splits[pp.id]?.qty || 0), 0);
+
+                let shareAmt = 0;
+                if (!excl) {
+                    if (item.splitType === 'equal') shareAmt = included_people.length > 0 ? item.total / included_people.length : 0;
+                    else if (item.splitType === 'qty') shareAmt = tQty > 0 ? (sp.qty / tQty) * item.total : 0;
+                    else if (item.splitType === 'pct') shareAmt = (sp.pct / 100) * item.total;
+                    else shareAmt = sp.custom || 0;
+                }
+
+                let inputCell = '';
+                if (excl) {
+                    inputCell = `<td></td>`;
+                } else if (item.splitType === 'equal') {
+                    inputCell = `<td class="split-share-cell" style="text-align:right;">auto</td>`;
+                } else if (item.splitType === 'qty') {
+                    inputCell = `<td><input type="number" value="${sp.qty || ''}" placeholder="0" min="0" step="0.1"
+        data-item="${itemId}" data-person="${p.id}" data-field="qty"
+        class="split-input" oninput="onSplitInput(this)" onfocus="this.select()"></td>`;
+                } else if (item.splitType === 'pct') {
+                    inputCell = `<td><input type="number" value="${sp.pct || ''}" placeholder="0" min="0" max="100" step="0.1"
+        data-item="${itemId}" data-person="${p.id}" data-field="pct"
+        class="split-input" oninput="onSplitInput(this)" onfocus="this.select()"></td>`;
+                } else {
+                    inputCell = `<td><input type="number" value="${sp.custom || ''}" placeholder="0.00" min="0" step="0.01"
+        data-item="${itemId}" data-person="${p.id}" data-field="custom"
+        class="split-input" oninput="onSplitInput(this)" onfocus="this.select()"></td>`;
+                }
+
+                const paidCell = showPayer
+                    ? (excl
+                        ? `<td></td>`
+                        : `<td><input type="number" value="${sp.paid || ''}" placeholder="0.00" min="0" step="0.01"
+              data-item="${itemId}" data-person="${p.id}" data-field="paid"
+              class="split-input" oninput="onSplitInput(this)" onfocus="this.select()"></td>`)
+                    : '';
+
+                html += `<tr class="${excl ? 'excl-row' : ''}" id="sr-${itemId}-${p.id}">
+      <td>
+        <div class="inout-pill ${incl ? 'in' : 'out'}" data-item="${itemId}" data-pid="${p.id}"
+          onclick="toggleInOut(${itemId},${p.id})">
+          <div class="inout-dot"></div>
+          <span>${incl ? 'In' : 'Out'}</span>
+        </div>
+      </td>
+      <td><div class="s-avatar" style="background:${gc(i)}">${ini(p.name)}</div></td>
+      <td class="split-name-cell" data-pid="${p.id}">${p.name || 'Person ' + (i + 1)}</td>
+      ${inputCell}
+      <td class="split-share-cell" id="share-${itemId}-${p.id}">${excl ? '—' : fmt(shareAmt)}</td>
+      ${paidCell}
+    </tr>`;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+            renderTotalRow(itemId);
+        }
+
+        // Called on every input change — only updates share cells, does NOT rebuild DOM
+        function onSplitInput(el) {
+            const itemId = parseInt(el.dataset.item);
+            const personId = parseInt(el.dataset.person);
+            const field = el.dataset.field;
+            const val = parseFloat(el.value) || 0;
+
+            const item = items.find(x => x.id === itemId); if (!item) return;
+            if (!item.splits[personId]) item.splits[personId] = { qty: 0, pct: 0, custom: 0, paid: 0, included: true };
+            item.splits[personId][field] = val;
+
+            refreshShareCells(itemId);
+        }
+
+        // Recompute and update only the share <td> cells + warning — no DOM rebuild
+        function refreshShareCells(itemId) {
+            const item = items.find(x => x.id === itemId); if (!item) return;
+            const incl_people = people.filter(p => item.splits[p.id]?.included !== false);
+            const tQty = incl_people.reduce((s, p) => s + (item.splits[p.id]?.qty || 0), 0);
+            const tPct = incl_people.reduce((s, p) => s + (item.splits[p.id]?.pct || 0), 0);
+            const tCustom = incl_people.reduce((s, p) => s + (item.splits[p.id]?.custom || 0), 0);
+
+            people.forEach(p => {
+                const sp = item.splits[p.id];
+                const excl = !sp || sp.included === false;
+                const cell = document.getElementById(`share-${itemId}-${p.id}`);
+                if (!cell) return;
+                if (excl) { cell.textContent = '—'; return; }
+                let amt = 0;
+                if (item.splitType === 'equal') amt = incl_people.length > 0 ? item.total / incl_people.length : 0;
+                else if (item.splitType === 'qty') amt = tQty > 0 ? ((sp.qty || 0) / tQty) * item.total : 0;
+                else if (item.splitType === 'pct') amt = ((sp.pct || 0) / 100) * item.total;
+                else amt = sp.custom || 0;
+                cell.textContent = fmt(amt);
+            });
+
+            renderTotalRow(itemId);
+        }
+
+        function renderTotalRow(itemId) {
+            const item = items.find(x => x.id === itemId); if (!item) return;
+            const warn = document.getElementById(`warn-${itemId}`); if (!warn) return;
+
+            const incl = people.filter(p => item.splits[p.id]?.included !== false);
+            const tPct = incl.reduce((s, p) => s + (item.splits[p.id]?.pct || 0), 0);
+            const tCustom = incl.reduce((s, p) => s + (item.splits[p.id]?.custom || 0), 0);
+
+            // Remove old total row if exists
+            const old = document.getElementById(`trow-${itemId}`);
+            if (old) old.remove();
+
+            const container = document.getElementById(`stable-${itemId}`); if (!container) return;
+            let tr = null;
+
+            if (item.splitType === 'pct') {
+                const ok = Math.abs(tPct - 100) < 0.01 || incl.length === 0;
+                warn.style.display = ok ? 'none' : 'block';
+                warn.textContent = `⚠ Percentages add up to ${tPct.toFixed(1)}% — should be 100%`;
+                tr = document.createElement('div'); tr.className = 'split-total-row'; tr.id = `trow-${itemId}`;
+                tr.innerHTML = `<span class="split-total-label">Total %</span><span class="split-total-val">${tPct.toFixed(1)}%</span>`;
+            } else if (item.splitType === 'custom') {
+                const ok = Math.abs(tCustom - item.total) < 0.01;
+                warn.style.display = ok ? 'none' : 'block';
+                warn.textContent = `⚠ Allocated ${fmt(tCustom)} of ${fmt(item.total)}`;
+                tr = document.createElement('div'); tr.className = 'split-total-row'; tr.id = `trow-${itemId}`;
+                tr.innerHTML = `<span class="split-total-label">Allocated</span><span class="split-total-val">${fmt(tCustom)} / ${fmt(item.total)}</span>`;
+            } else {
+                warn.style.display = 'none';
+            }
+            if (tr) container.appendChild(tr);
+        }
+
+        // Toggle per-person inclusion in a specific item
+        function toggleInOut(itemId, personId) {
+            const item = items.find(x => x.id === itemId); if (!item) return;
+            if (!item.splits[personId]) item.splits[personId] = { qty: 0, pct: 0, custom: 0, paid: 0, included: true };
+            item.splits[personId].included = !(item.splits[personId].included !== false);
+
+            const incl = item.splits[personId].included !== false;
+
+            // Update pill UI
+            const pill = document.querySelector(`.inout-pill[data-item="${itemId}"][data-pid="${personId}"]`);
+            if (pill) {
+                pill.className = `inout-pill ${incl ? 'in' : 'out'}`;
+                pill.querySelector('span').textContent = incl ? 'In' : 'Out';
+            }
+
+            // Update row styling
+            const row = document.getElementById(`sr-${itemId}-${personId}`);
+            if (row) row.className = incl ? '' : 'excl-row';
+
+            // Rebuild input cell and share cell for that row (minimal update)
+            rebuildSplitTable(itemId); // safe to rebuild since we're not mid-typing
+        }
+
+        // ── PAYMENTS ──────────────────────────────────────────────────────────────────
+        function allItemsTracked() {
+            const validItems = items.filter(i => i.total > 0 || i.name.trim() !== '');
+            return validItems.length > 0 && validItems.every(i => i.showPayer);
+        }
+
+        function renderPayments() {
+            const tracked = allItemsTracked();
+            document.getElementById('payments-section').style.display = tracked ? 'none' : 'block';
+            document.getElementById('auto-pay-bar').style.display = tracked ? 'flex' : 'none';
+            if (tracked) return;
+
+            people.forEach(p => { if (payments[p.id] === undefined) payments[p.id] = 0; });
+            const grid = document.getElementById('payments-grid');
+            grid.innerHTML = '';
+            people.forEach((p, i) => {
+                const row = document.createElement('div');
+                row.className = 'payment-row';
+                row.innerHTML = `
+      <div class="s-avatar" style="background:${gc(i)};width:28px;height:28px;">${ini(p.name)}</div>
+      <div style="font-size:0.85rem;font-weight:500;">${p.name || 'Person ' + (i + 1)}</div>
+      <input type="number" value="${payments[p.id] || ''}" placeholder="₹0.00" min="0" step="0.01"
+        oninput="updatePayment(${p.id}, parseFloat(this.value)||0)" onfocus="this.select()"
+        onkeydown="if(event.key==='Enter') { event.preventDefault(); const next = this.parentElement.nextElementSibling?.querySelector('input'); if(next) next.focus(); else buildSummary(); }">`;
+                grid.appendChild(row);
+            });
+            updateTotalPaid();
+        }
+
+        function updatePayment(id, val) { payments[id] = val; updateTotalPaid(); }
+        function updateTotalPaid() {
+            const t = Object.values(payments).reduce((s, v) => s + v, 0);
+            const el = document.getElementById('total-paid-display');
+            if (el) el.textContent = fmt(t);
+        }
+
+        // ── CALCULATIONS ──────────────────────────────────────────────────────────────
+        function calcShare(pid) {
+            let s = 0;
+            items.forEach(item => {
+                const sp = item.splits[pid];
+                if (!sp || sp.included === false) return;
+                const incl = people.filter(p => item.splits[p.id]?.included !== false);
+                if (item.splitType === 'equal') s += incl.length > 0 ? item.total / incl.length : 0;
+                else if (item.splitType === 'qty') { const tq = incl.reduce((a, p) => a + (item.splits[p.id]?.qty || 0), 0); s += tq > 0 ? (sp.qty / tq) * item.total : 0; }
+                else if (item.splitType === 'pct') s += (sp.pct / 100) * item.total;
+                else s += sp.custom || 0;
+            });
+            return s;
+        }
+
+        function calcPaid(pid) {
+            if (allItemsTracked()) {
+                return items.reduce((s, item) => s + (item.splits[pid]?.paid || 0), 0);
+            }
+            return payments[pid] || 0;
+        }
+
+        function calcSettlements(balances) {
+            const arr = Object.entries(balances).map(([id, bal]) => ({ id: parseInt(id), bal }));
+            arr.sort((a, b) => a.bal - b.bal);
+            const txns = []; let lo = 0, hi = arr.length - 1;
+            while (lo < hi) {
+                const d = arr[lo], c = arr[hi];
+                if (Math.abs(d.bal) < 0.005) { lo++; continue; }
+                if (c.bal < 0.005) { hi--; continue; }
+                const amt = Math.min(-d.bal, c.bal);
+                if (amt > 0.005) txns.push({ from: d.id, to: c.id, amount: amt });
+                d.bal += amt; c.bal -= amt;
+                if (Math.abs(d.bal) < 0.005) lo++;
+                if (c.bal < 0.005) hi--;
+            }
+            return txns;
+        }
+
+        // ── BUILD SUMMARY ─────────────────────────────────────────────────────────────
+        function buildSummary() {
+            if (people.length < 2) { alert('Add at least 2 people first.'); switchTab('input'); return; }
+            if (!items.length) { alert('Add at least one item first.'); switchTab('input'); return; }
+
+            const title = document.getElementById('session-title').value || 'Session';
+            const date = document.getElementById('session-date').value;
+            const grand = items.reduce((s, i) => s + i.total, 0);
+
+            const shares = {}, paid = {}, bal = {};
+            people.forEach(p => {
+                shares[p.id] = calcShare(p.id);
+                paid[p.id] = calcPaid(p.id);
+                bal[p.id] = paid[p.id] - shares[p.id];
+            });
+
+            const settlements = calcSettlements(bal);
+            const totalPaid = people.reduce((s, p) => s + (paid[p.id] || 0), 0);
+
+            if (Math.abs(totalPaid - grand) > 0.05) {
+                if (!confirm(`Warning: The total amount paid (${fmt(totalPaid)}) does not match the total cost of all items (${fmt(grand)}). There is a difference of ${fmt(Math.abs(totalPaid - grand))}. Do you still want to continue and calculate settlements?`)) {
+                    if (allItemsTracked()) switchTab('input'); else switchTab('output');
+                    return;
+                }
+            }
+
+            const bkd = items.map(item => {
+                const row = { name: item.name || '—', total: item.total, pp: {} };
+                const incl = people.filter(p => item.splits[p.id]?.included !== false);
+                people.forEach(p => {
+                    const sp = item.splits[p.id];
+                    if (!sp || sp.included === false) { row.pp[p.id] = null; return; }
+                    if (item.splitType === 'equal') row.pp[p.id] = incl.length > 0 ? item.total / incl.length : 0;
+                    else if (item.splitType === 'qty') { const tq = incl.reduce((s, pp) => s + (item.splits[pp.id]?.qty || 0), 0); row.pp[p.id] = tq > 0 ? (sp.qty / tq) * item.total : 0; }
+                    else if (item.splitType === 'pct') row.pp[p.id] = (sp.pct / 100) * item.total;
+                    else row.pp[p.id] = sp.custom || 0;
+                });
+                return row;
+            });
+
+            window._waText = buildWA(title, date, settlements, shares, paid, grand);
+
+            document.getElementById('summary-content').innerHTML = `
+    <div class="summary-hero">
+      <div class="summary-hero-title">${title}</div>
+      <div class="summary-hero-meta">${date} · ${people.length} people · ${items.length} items</div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-val">${fmt(grand)}</div><div class="hero-stat-label">Total Spent</div></div>
+        <div class="hero-stat"><div class="hero-stat-val">${fmt(grand / Math.max(people.length, 1))}</div><div class="hero-stat-label">Avg / Person</div></div>
+        <div class="hero-stat"><div class="hero-stat-val">${settlements.length}</div><div class="hero-stat-label">Transfers</div></div>
+      </div>
+    </div>
+
+    <div class="settle-card">
+      <div class="settle-title">🤝 How to Settle Up</div>
+      <div class="settle-subtitle">Optimized to the fewest possible transfers.</div>
+      ${settlements.length === 0
+                    ? `<div class="settled-all">🎉 Everyone is already settled — no transfers needed!</div>`
+                    : settlements.map(t => {
+                        const f = people.find(p => p.id === t.from), to = people.find(p => p.id === t.to);
+                        const fi = people.indexOf(f), ti = people.indexOf(to);
+                        return `<div class="settlement-item">
+            <div class="s-avatar" style="background:${gc(fi)};width:28px;height:28px;">${ini(f?.name)}</div>
+            <div class="s-name">${f?.name || '?'}</div>
+            <div class="s-verb">pays</div><div class="s-arrow">→</div>
+            <div class="s-avatar" style="background:${gc(ti)};width:28px;height:28px;">${ini(to?.name)}</div>
+            <div class="s-name">${to?.name || '?'}</div>
+            <div class="s-amount">${fmt(t.amount)}</div>
+          </div>`;
+                    }).join('')
+                }
+      <div style="margin-top:14px;">
+        <button class="whatsapp-btn" onclick="copyWhatsApp()">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.106.549 4.09 1.508 5.814L0 24l6.335-1.493A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.028-1.382l-.36-.214-3.732.879.938-3.63-.235-.374A9.787 9.787 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182c5.43 0 9.818 4.388 9.818 9.818 0 5.43-4.388 9.818-9.818 9.818z"/></svg>
+          Copy for WhatsApp
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleCol('bal')">
+        <div class="collapsible-title">
+          <span class="icon" style="width:26px;height:26px;background:var(--accent-light);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.78rem;">📊</span>
+          Individual Balances
+        </div>
+        <span class="collapsible-arrow open" id="arrow-bal">▶</span>
+      </div>
+      <div class="collapsible-body open" id="body-bal">
+        <div class="balances-grid">
+          ${people.map((p, i) => {
+                    const b = bal[p.id] || 0, cls = b > 0.005 ? 'positive' : b < -0.005 ? 'negative' : 'zero', lbl = b > 0.005 ? 'gets back' : b < -0.005 ? 'owes' : 'settled';
+                    return `<div class="balance-card ${cls}">
+              <div class="balance-person">
+                <div style="width:22px;height:22px;border-radius:50%;background:${gc(i)};display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:700;color:white;flex-shrink:0;">${ini(p.name)}</div>
+                <span style="font-size:0.8rem;font-weight:500;">${p.name || '?'}</span>
+              </div>
+              <div class="balance-amount ${cls}">${fmt(Math.abs(b))}</div>
+              <div class="balance-label">Owes ${fmt(shares[p.id])} · Paid ${fmt(paid[p.id])}<br>${lbl}</div>
+            </div>`;
+                }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleCol('bkd')">
+        <div class="collapsible-title">
+          <span class="icon" style="width:26px;height:26px;background:var(--accent-light);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.78rem;">🧾</span>
+          Item Breakdown
+        </div>
+        <span class="collapsible-arrow" id="arrow-bkd">▶</span>
+      </div>
+      <div class="collapsible-body closed" id="body-bkd">
+        <div style="overflow-x:auto;">
+          <table class="breakdown-table">
+            <thead><tr><th>Item</th><th>Total</th>${people.map(p => `<th>${p.name || '?'}</th>`).join('')}</tr></thead>
+            <tbody>
+              ${bkd.map(r => `<tr>
+                <td>${r.name}</td><td class="mono">${fmt(r.total)}</td>
+                ${people.map(p => `<td class="mono">${r.pp[p.id] === null ? '<span style="color:var(--ink-faint)">—</span>' : fmt(r.pp[p.id] || 0)}</td>`).join('')}
+              </tr>`).join('')}
+              <tr style="font-weight:600;border-top:2px solid var(--border);">
+                <td>Total Owed</td><td class="mono">${fmt(grand)}</td>
+                ${people.map(p => `<td class="mono" style="color:var(--accent);">${fmt(shares[p.id] || 0)}</td>`).join('')}
+              </tr>
+              <tr>
+                <td style="color:var(--ink-muted);font-size:0.77rem;">Paid</td>
+                <td class="mono" style="color:var(--ink-muted);">${fmt(totalPaid)}</td>
+                ${people.map(p => `<td class="mono" style="color:var(--ink-muted);">${fmt(paid[p.id] || 0)}</td>`).join('')}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+
+            document.getElementById('summary-actions').style.display = 'flex';
+            setTimeout(() => document.getElementById('summary-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        }
+
+        function buildWA(title, date, settlements, shares, paid, grand) {
+            const lines = [`💸 *${title}* — ${date}`, `Total: ₹${grand.toFixed(2)}`, '', '*Settle up:*'];
+            if (!settlements.length) lines.push('🎉 All settled!');
+            else settlements.forEach(t => {
+                const f = people.find(p => p.id === t.from), to = people.find(p => p.id === t.to);
+                lines.push(`• ${f?.name || '?'} → ${to?.name || '?'}: ₹${t.amount.toFixed(2)}`);
+            });
+            lines.push('', '*Individual:*');
+            people.forEach(p => lines.push(`• ${p.name || '?'}: owes ₹${(shares[p.id] || 0).toFixed(2)}, paid ₹${(paid[p.id] || 0).toFixed(2)}`));
+            lines.push('', '_via SplitExpense_');
+            return lines.join('\n');
+        }
+
+        function copyWhatsApp() {
+            if (!window._waText) return;
+            const toast = document.getElementById('copy-toast');
+            const show = () => { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2400); };
+            navigator.clipboard.writeText(window._waText).then(show).catch(() => {
+                const ta = document.createElement('textarea'); ta.value = window._waText;
+                document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); show();
+            });
+        }
+
+        function toggleCol(id) {
+            const body = document.getElementById(`body-${id}`), arrow = document.getElementById(`arrow-${id}`);
+            const open = body.classList.contains('open');
+            body.classList.toggle('open', !open); body.classList.toggle('closed', open); arrow.classList.toggle('open', !open);
+        }
+
+        function startNew() {
+            if (!confirm('Start fresh? Session will be cleared.')) return;
+            people = []; items = []; payments = {}; pIdCtr = 0; iIdCtr = 0;
+            document.getElementById('session-title').value = '';
+            document.getElementById('session-date').value = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            document.getElementById('summary-content').innerHTML = '';
+            document.getElementById('summary-actions').style.display = 'none';
+            addPerson('Person 1'); addPerson('Person 2'); addPerson('Person 3');
+            addItem(); switchTab('input');
+        }
+    </script>
+</body>
+
+</html>
