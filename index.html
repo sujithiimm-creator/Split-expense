@@ -4,7 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Split Expense</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>Split Expenses Online | Free Bill Splitter for Friends & Trips</title>
+    <meta name="title" content="Split Expenses Online | Free Bill Splitter for Friends & Trips">
+    <meta name="description" content="Free online tool to split expenses with friends, roommates, or travel groups. Calculate who owes whom instantly. No signup required.">
+    <meta name="keywords" content="split expense, bill splitter, expense splitting app, share bills, roommate expenses, split travel costs, group expenses, cost calculator, who owes who, online bill splitter">
+    <meta name="author" content="Split Expense">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Split Expense - Free Bill Splitting App for Friends & Roommates">
+    <meta property="og:description" content="Effortlessly split group travel expenses, roommate bills, and shared dinners with friends. Calculate exactly who owes who in seconds.">
+    <meta property="og:site_name" content="Split Expense">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Split Expense - Free Bill Splitting App">
+    <meta name="twitter:description" content="Effortlessly split group travel expenses, roommate bills, and shared dinners with friends.">
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
@@ -1153,7 +1171,7 @@
 <body>
 
     <header>
-        <div class="logo">Split<span>Expense</span></div>
+        <h1 class="logo" style="margin: 0; font-size: inherit;">Split<span>Expense</span></h1>
         <div class="header-session">
             <input type="text" class="header-input sn" id="session-title" placeholder="Session name…">
             <span class="header-sep">·</span>
@@ -1228,6 +1246,42 @@
                 <button class="btn btn-primary" onclick="window.print()">🖨 Print / PDF</button>
             </div>
         </div>
+
+        <!-- SEO Content Section (Hidden from main app flow but visible to search engines) -->
+        <section class="seo-content" style="margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border); color: var(--ink-muted);">
+            <h1 style="font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--ink); margin-bottom: 20px;">Split Expenses Easily With Friends</h1>
+            <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px;">
+                Our free online bill splitter makes it incredibly simple to divide costs among friends, roommates, and travel groups. No more awkward math or complex spreadsheets. Calculate exactly who owes whom instantly without any sign-up required.
+            </p>
+
+            <h2 style="font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--ink); margin-bottom: 15px;">How to Split Expenses With Friends</h2>
+            <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px;">
+                Whether you're organizing a weekend getaway, managing household bills, or just splitting a group dinner, our expense splitter takes the hassle out of shared costs. Simply add everyone involved, list your expenses, and the tool will automatically calculate the most efficient way to settle up.
+            </p>
+
+            <h2 style="font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--ink); margin-bottom: 15px;">Why Use an Expense Splitter?</h2>
+            <ul style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; padding-left: 20px;">
+                <li style="margin-bottom: 8px;"><strong>Avoid Confusion:</strong> Keep a clear record of who paid for what and perfectly track shared balances.</li>
+                <li style="margin-bottom: 8px;"><strong>Quick Calculations:</strong> Save time manually figuring out split amounts or complex unequal shares.</li>
+                <li style="margin-bottom: 8px;"><strong>Fair Distribution:</strong> Split by exact amounts, percentages, or shares to ensure everyone pays their fair part.</li>
+            </ul>
+
+            <h2 style="font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--ink); margin-bottom: 15px;">Example Scenarios</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; font-size: 0.95rem; line-height: 1.6;">
+                <div style="background: var(--surface); padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                    <strong style="color: var(--ink); display: block; margin-bottom: 8px;">Travel Group Expense Sharing</strong>
+                    Track flights, hotels, excursions, and meals during group trips efficiently.
+                </div>
+                <div style="background: var(--surface); padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                    <strong style="color: var(--ink); display: block; margin-bottom: 8px;">Splitting Rent and Utilities</strong>
+                    Perfect for roommates dividing monthly rent, electricity, internet, and groceries.
+                </div>
+                <div style="background: var(--surface); padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                    <strong style="color: var(--ink); display: block; margin-bottom: 8px;">Group Dinners & Outings</strong>
+                    Quickly divide a restaurant bill, including tax and tip, even when shares are unequal.
+                </div>
+            </div>
+        </section>
 
     </main>
     <div class="copy-toast" id="copy-toast">Copied! Paste in WhatsApp.</div>
